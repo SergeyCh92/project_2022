@@ -24,9 +24,22 @@ class VkBot:
 
     def get_data_user(self, user_id):
         data = self.vk.method('users.get', {'user_ids': user_id, 'fields': 'city, sex, bdate'})
-        if 'bdate' not in data[0] or 'city' not in data[0] or 'sex' not in data[0]:
-            return False, False, False
-        return data[0]['bdate'], data[0]['city']['id'], data[0]['sex']
+        # if 'bdate' not in data[0] or 'city' not in data[0] or 'sex' not in data[0]:
+        #     return False, False, False
+        if 'bdate' not in data[0]:
+            bdate = False
+        else:
+            bdate = data[0]['bdate']
+        if 'city' not in data[0]:
+            city = False
+        else:
+            city = data[0]['city']['id']
+        if 'sex' not in data[0]:
+            sex = False
+        else:
+            sex = data[0]['sex']
+        # return data[0]['bdate'], data[0]['city']['id'], data[0]['sex']
+        return bdate, city, sex
 
     def get_list_users(self, city, sex, age):
         data = self.vk_user.method('users.search', {'city': city, 'fields': 'relation, city', 'count': 1000, 'sex': sex,
@@ -38,7 +51,7 @@ class VkBot:
     def get_age(self, data):
         try:
             date_obj = datetime.datetime.strptime(data, '%d.%m.%Y')
-        except ValueError:
+        except (ValueError, TypeError):
             return False
         delta = datetime.datetime.now() - date_obj
         delta = delta.days / 365.2425

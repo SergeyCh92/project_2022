@@ -28,6 +28,7 @@ except vk_api.exceptions.ApiError:
     sys.exit()
 print('Токены успешно прошли проверку валидности! Бот запущен, можно начинать работу в Вк.')
 
+
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
         request = event.text.lower()
@@ -36,11 +37,30 @@ for event in longpoll.listen():
             name = vk.get_name(event.user_id)
             vk.write_msg(event.user_id, f"Хай, {name}")
         elif request == "найди мне пару":
+            end = False
             list_id_users = select_data(event.user_id)
             new_list = [item for sublist in list_id_users for item in sublist]
             data, city, sex = vk.get_data_user(event.user_id)
+            if not city:
+                vk.write_msg(event.user_id, 'У Вас на странице не указан город. Для возможности поиска людей в одном'
+                                            'городе с Вами, необходимо указать Ваш город на странице Вконтакте.')
+                continue
             sex = vk.check_sex(sex)
             age = vk.get_age(data)
+            if not age:
+                vk.write_msg(event.user_id, 'У Вас на странице либо не указана, либо не полностью указана дата '
+                                            'рождения. Введите Ваш возраст (только полные года, например 26).')
+                for event_tw in longpoll.listen():
+                    if event_tw.type == VkEventType.MESSAGE_NEW and event_tw.to_me:
+                        try:
+                            age = int(event_tw.text)
+                        except ValueError:
+                            vk.write_msg(event.user_id, 'Нужно ввести только цифры. Будьте внимательнее :)')
+                            end = True
+                            break
+                        break
+                if end:
+                    continue
             for i in vk.get_list_users(city, sex, age):
                 if i in new_list:
                     continue
