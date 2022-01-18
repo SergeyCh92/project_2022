@@ -3,6 +3,24 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import datetime
+import sys
+from settings import MAN, WOMAN
+
+
+def create_connection_vk(token, user_token):
+    vk_longpoll = vk_api.VkApi(token=token)
+    try:
+        longpoll = VkLongPoll(vk_longpoll)
+    except vk_api.exceptions.ApiError:
+        print('Вы ввели неверный групповой токен. Перезапустите программу и введите корректный ключ доступа.')
+        sys.exit()
+    vk = VkBot(token, user_token)
+    try:
+        vk.get_list_photo(1)
+    except vk_api.exceptions.ApiError:
+        print('Вы ввели неверный групповой токен. Перезапустите программу и введите корректный ключ доступа.')
+        sys.exit()
+    print('Токены успешно прошли проверку валидности! Бот запущен, можно начинать работу в Вк.')
 
 
 class VkBot:
@@ -58,10 +76,10 @@ class VkBot:
         return int(delta)
 
     def check_sex(self, sex):
-        if sex == 1:
-            sex = 2
+        if sex == MAN:
+            sex = WOMAN
         else:
-            sex = 1
+            sex = MAN
         return sex
 
     def get_list_photo(self, id):

@@ -1,33 +1,17 @@
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from DB import select_data, insert_data
-from bot_func import VkBot
-import sys
+from bot_func import VkBot, create_connection_vk
 
-
-# with open('t.txt') as f:
-#     token = f.read().strip()
-#
-# with open('toc_vk.txt') as f:
-#     user_token = f.read().strip()
 
 token = input('Введите групповой токен Вк:\n')
 user_token = input('Введите пользовательский токен Вк:\n')
 
-vk_longpoll = vk_api.VkApi(token=token)
-try:
-    longpoll = VkLongPoll(vk_longpoll)
-except vk_api.exceptions.ApiError:
-    print('Вы ввели неверный групповой токен. Перезапустите программу и введите корректный ключ доступа.')
-    sys.exit()
-vk = VkBot(token, user_token)
-try:
-    vk.get_list_photo(1)
-except vk_api.exceptions.ApiError:
-    print('Вы ввели неверный групповой токен. Перезапустите программу и введите корректный ключ доступа.')
-    sys.exit()
-print('Токены успешно прошли проверку валидности! Бот запущен, можно начинать работу в Вк.')
 
+create_connection_vk(token, user_token)
+vk_longpoll = vk_api.VkApi(token=token)
+longpoll = VkLongPoll(vk_longpoll)
+vk = VkBot(token, user_token)
 
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
